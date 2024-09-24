@@ -1,74 +1,96 @@
-// Importar el modelo de Order (Pedido)
 const Order = require("../models/OrderModel");
+const User = require('../models/UserModel');
 
-// Función para crear un nuevo pedido
+// Crear una nueva orden
 exports.createOrder = async (req, res) => {
   try {
-    // Extraer los datos del cuerpo de la solicitud
     const { user, products, totalPrice } = req.body;
-    
-    // Crear una nueva instancia de Order con los datos proporcionados
-    const order = new Order({ user, products, totalPrice });
-    
-    // Guardar el pedido en la base de datos
-    await order.save();
-    
-    // Responder con un estado 201 (Creado) y el pedido creado
-    res.status(201).json(order);
+
+    // Crear una nueva orden
+    const newOrder = new Order({
+      user,
+      products,
+      totalPrice,
+      status: "pending", // Estado por defecto
+    });
+
+    // Guardar la orden en la base de datos
+    const savedOrder = await newOrder.save();
+    res.status(201).json(savedOrder);
   } catch (error) {
-    // Manejar errores en la creación del pedido y responder con un estado 500
-    res.status(500).json({ message: "Error al crear el pedido", error });
+    res.status(500).json({ message: "Error al crear la orden", error });
   }
 };
 
-// Función para obtener un pedido por su ID
+// Obtener todas las órdenes de un usuario
+exports.getUserOrders = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    
+    // Buscar las órdenes del usuario
+    const orders = await Order.find({ user: userId }).populate("products.product");
+
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener las órdenes", error });
+  }
+};
+
+// Obtener una orden por su ID
 exports.getOrderById = async (req, res) => {
   try {
-    // Buscar el pedido por su ID y poblar los campos de usuario y productos relacionados
-    const order = await Order.findById(req.params.id).populate("user").populate("products.product");
+    const orderId = req.params.id;
     
-    // Si no se encuentra el pedido, responder con un estado 404 (No encontrado)
+    // Buscar la orden por su ID
+    const order = await Order.findById(orderId).populate("products.product").populate("user");
+    
     if (!order) {
-      return res.status(404).json({ message: "Pedido no encontrado" });
+      return res.status(404).json({ message: "Orden no encontrada" });
     }
-    
-    // Responder con el pedido encontrado y un estado 200 (Éxito)
+
     res.status(200).json(order);
   } catch (error) {
-    // Manejar errores al obtener el pedido y responder con un estado 500
-    res.status(500).json({ message: "Error al obtener el pedido", error });
+    res.status(500).json({ message: "Error al obtener la orden", error });
   }
 };
 
-// Función para actualizar el estado de un pedido por su ID
+// Actualizar el estado de una orden
 exports.updateOrderStatus = async (req, res) => {
   try {
-    // Actualizar el estado del pedido basado en el ID del pedido y el nuevo estado proporcionado
-    const order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
-    
-    // Si no se encuentra el pedido, responder con un estado 404 (No encontrado)
-    if (!order) {
-      return res.status(404).json({ message: "Pedido no encontrado" });
+    const orderId = req.params.id;
+    const { status, shippedAt } = req.body;
+
+    // Actualizar la orden con el nuevo estado y fecha de envío
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { status, shippedAt },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Orden no encontrada" });
     }
-    
-    // Responder con el pedido actualizado y un estado 200 (Éxito)
-    res.status(200).json(order);
+
+    res.status(200).json(updatedOrder);
   } catch (error) {
-    // Manejar errores al actualizar el estado del pedido y responder con un estado 500
-    res.status(500).json({ message: "Error al actualizar el estado del pedido", error });
+    res.status(500).json({ message: "Error al actualizar la orden", error });
   }
 };
 
-// Función para eliminar un pedido por su ID
+// Eliminar una orden
 exports.deleteOrder = async (req, res) => {
   try {
-    // Buscar y eliminar el pedido por su ID
-    await Order.findByIdAndDelete(req.params.id);
-    
-    // Responder con un estado 200 (Éxito) y un mensaje de eliminación exitosa
-    res.status(200).json({ message: "Pedido eliminado con éxito" });
+    const orderId = req.params.id;
+
+    // Eliminar la orden
+    const deletedOrder = await Order.findByIdAndDelete(orderId);
+
+    if (!deletedOrder) {
+      return res.status(404).json({ message: "Orden no encontrada" });
+    }
+
+    res.status(200).json({ message: "Orden eliminada correctamente" });
   } catch (error) {
-    // Manejar errores al eliminar el pedido y responder con un estado 500
-    res.status(500).json({ message: "Error al eliminar el pedido", error });
+    res.status(500).json({ message: "Error al eliminar la orden", error });
   }
 };

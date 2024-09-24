@@ -1,12 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const categoryController = require("../controllers/categoryController");
-const authMiddleware = require("../middleware/authMiddleware");
+const verifyToken = require("../middleware/authMiddleware");
 
+// Crear una nueva categoría (solo usuarios autenticados)
+router.post("/", verifyToken, categoryController.createCategory);
 
+// Obtener todas las categorías (no requiere autenticación)
+router.get("/", categoryController.getAllCategories);
 
-// Solo los usuarios autenticados pueden crear, actualizar o eliminar categorias
-router.post("/", authMiddleware, categoryController.createCategory);
+// Obtener una categoría por ID (no requiere autenticación)
+router.get("/:id", categoryController.getCategoryById);
 
+// Actualizar una categoría (solo usuarios autenticados)
+router.put("/:id", verifyToken, categoryController.updateCategory);
+
+// Eliminar una categoría (solo usuarios autenticados)
+router.delete("/:id", verifyToken, categoryController.deleteCategory);
 
 module.exports = router;

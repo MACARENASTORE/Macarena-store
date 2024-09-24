@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const reviewController = require("../controllers/reviewController");
-const authMiddleware = require("../middleware/authMiddleware");
+const verifyToken = require('../middleware/authMiddleware'); // Middleware de autenticación
 
 // Crear reseña y obtener reseñas de un producto
-router.post("/", authMiddleware, reviewController.createReview);
-router.get("/:productId", reviewController.getReviewsByProduct);
+router.post("/", verifyToken, reviewController.createReview);
+router.get("/:productId", verifyToken, reviewController.getReviewsByProduct);
 
 // Eliminar reseña
-router.delete("/:id", authMiddleware, reviewController.deleteReview);
+router.delete("/:id", verifyToken, reviewController.deleteReview);
 
 module.exports = router;

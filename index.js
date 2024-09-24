@@ -1,17 +1,20 @@
 const express = require('express');
+const cors = require('cors'); // Importar cors
 require('dotenv').config();
 
 // Importar rutas y conexión a la DB
 const connectDB = require('./src/config/database');
-const routes = require('./src/routes/routes'); // Asegúrate de que esta ruta sea correcta
+const routes = require('./src/routes/routes'); 
 
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-const uploadRouter = require('./src/controllers/upload-file.controller'); 
-app.use('/upload', uploadRouter);
-
+// Usar CORS
+app.use(cors({
+  origin: '*', // Permitir solicitudes desde cualquier origen
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Métodos permitidos
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
 // Rutas
 app.use('/api', routes);
 

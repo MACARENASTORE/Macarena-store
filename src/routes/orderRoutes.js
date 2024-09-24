@@ -1,16 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const orderController = require("../controllers/orderController");
-const authMiddleware = require("../middleware/authMiddleware");
+const verifyToken = require('../middleware/authMiddleware'); // Middleware de autenticación
 
-// Crear un pedido y obtener detalles de un pedido (protegidas)
-router.post("/", authMiddleware, orderController.createOrder);
-router.get("/:id", authMiddleware, orderController.getOrderById);
+// Ruta para crear una nueva orden
+router.post("/", verifyToken, orderController.createOrder);
 
-// Actualizar el estado de un pedido (protegido)
-router.put("/:id/status", authMiddleware, orderController.updateOrderStatus);
+// Ruta para obtener todas las órdenes de un usuario
+router.get("/user/:userId", verifyToken, orderController.getUserOrders);
 
-// Eliminar un pedido
-router.delete("/:id", authMiddleware, orderController.deleteOrder);
+// Ruta para obtener una orden específica por su ID
+router.get("/:id", verifyToken, orderController.getOrderById);
+
+// Ruta para actualizar el estado de una orden (por ejemplo, cambiar a "shipped" o "delivered")
+router.put("/:id", verifyToken, orderController.updateOrderStatus);
+
+// Ruta para eliminar una orden
+router.delete("/:id", verifyToken, orderController.deleteOrder);
 
 module.exports = router;
