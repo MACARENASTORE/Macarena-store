@@ -1,5 +1,5 @@
 const express = require('express');
-const { addToCart, getCartByUserId, removeFromCart } = require('../controllers/cartController');
+const { addToCart, getCartByUserId, removeFromCart, getAllCarts } = require('../controllers/cartController');
 const router = express.Router();
 const verifyToken = require('../middleware/authMiddleware'); // Middleware de autenticación
 
@@ -13,5 +13,8 @@ router.get('/:userId', verifyToken, getCartByUserId);
 
 // Ruta para eliminar un producto del carrito
 router.delete('/:cartId/:productId', verifyToken, removeFromCart);
+
+
+router.get('/', verifyToken, getAllCarts);
 
 module.exports = router;
